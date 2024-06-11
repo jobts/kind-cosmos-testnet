@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: testnet
+  namespace: testnet 
+spec:
+  selector:
+    matchLabels:
+      app: testnet
+  serviceName: "testnet"
+  replicas: 1
+  minReadySeconds: 15 # by default is 0
+  template:
+    metadata:
+      labels:
+        app: testnet
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: testnet
+        image: jobts/cosmos-sdk
+        command: [/sbin/tini]
+        args:
+          - --
+          - sh
+          - -c
+          - simd testnet init-files --keyring-backend test &&
+            simd testnet start -n1 
+            %{ for name, port in ports ~}
+            %{ if name != "grpc" ~}
+            --${name}.address tcp://${host}:${port}
+            %{ else ~}
+            --${name}.address ${host}:${port}
+            %{ endif ~}
+            %{ endfor }
+        ports:
+        %{ for name, port in ports }
+        - name: ${name}
+          containerPort: ${port}
+        %{ endfor }
+        volumeMounts:
+        - name: vol
+          mountPath: /root/.simapp
+  volumeClaimTemplates:
+  - metadata:
+      name: vol 
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "standard"
+      resources:
+        requests:
+          storage: 1Gi
