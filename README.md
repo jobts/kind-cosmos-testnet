@@ -9,7 +9,7 @@ Terraform deployment  of Kind k8s cluster with cosmos testnet node.
 ## Realization
 
 You have to install these packages on your machine: 
-- terrafrom
+- terraform
 - docker
 - kubectl
 
