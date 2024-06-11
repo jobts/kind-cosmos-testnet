@@ -17,6 +17,7 @@ Commands to set up the cluster and deploy the applications:
 
 ```
 terraform init
+terraform apply  -target kind_cluster.default
 terraform apply
 ```
 For other tasks in the k8s cluster you can use kubectl  
